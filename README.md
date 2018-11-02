@@ -6,7 +6,7 @@ O projeto desenvolvido para a terceira nota da disciplina de Inteligência Artif
 2. divaldo Vasconcelo
 3. Philipe de Luna
 
-### Bibliotecas em Python que precisam ser instaladas previamente 
+### Bibliotecas em Python(Recomendável a versão 3.5+) que precisam ser instaladas previamente
 * Numpy
 * Spacy
 * Pandas
