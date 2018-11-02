@@ -116,7 +116,7 @@ Xtrain = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 # Definiçao de rotulos de treinamento
 ytrain = array([0 for _ in range(900)] + [1 for _ in range(900)])
 
-# Carrega toda a revisao de teste que foram feitos
+# Carrega toda a revisao de testes que foram feitos
 positive_docs = process_docs('txt_sentoken/pos', vocab, False)
 negative_docs = process_docs('txt_sentoken/neg', vocab, False)
 test_docs = negative_docs + positive_docs
@@ -131,7 +131,7 @@ vocab_size = len(tokenizer.word_index) + 1
 
 #Carregar Incorporaçao de um arquivo
 # raw_embedding = load_embedding('glove.6B.100d.txt')-  Realizar alguns teste
-# get vectors in the right order
+# obter vetores na ordem certa
 embedding_vectors = get_weight_matrix(raw_embedding, tokenizer.word_index)
 embedding_layer = Embedding(vocab_size, 100, weights=[embedding_vectors], input_length=max_length, trainable=False)
 
@@ -145,7 +145,6 @@ model.add(Dense(1, activation='sigmoid'))
 print(model.summary())
 # Compilaçao da Rede
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-# fit network
 model.fit(Xtrain, ytrain, epochs=10, verbose=2)
 # Avaliaçao
 loss, acc = model.evaluate(Xtest, ytest, verbose=0)
