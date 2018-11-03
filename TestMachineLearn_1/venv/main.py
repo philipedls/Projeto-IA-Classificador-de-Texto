@@ -1,3 +1,4 @@
+# coding=utf-8
 from string import punctuation
 from os import listdir
 from numpy import array
@@ -20,6 +21,7 @@ def load_doc(filename):
     file.close()
     return text
 
+
 #Carrega arquivo.csv na memoria
 def load_csv(filename):
     lines = csv.reader(open(filename, "rb"))
@@ -27,7 +29,6 @@ def load_csv(filename):
     for i in range(len(dataset)):
         dataset[i] = [float(x) for x in dataset[i]]
     return dataset
-
 
 # Transforma o documento em tokens limpos
 def clean_doc(doc, vocab):
@@ -52,6 +53,7 @@ def process_docs(directory, vocab, is_trian):
         if not is_trian and not filename.startswith('cv9'):
             continue
 
+
         path = directory + '/' + filename
         doc = load_doc(path)
         tokens = clean_doc(doc, vocab)
@@ -61,7 +63,7 @@ def process_docs(directory, vocab, is_trian):
 
 # Carrega um "embutido" tipo como um diretorio
 def load_embedding(filename):
-    # Carrega o "embutido na momoria e pula a primeira linha
+    # Carrega o "embutido" na momoria e pula a primeira linha
     file = open(filename, 'r')
     lines = file.readlines()
     file.close()
@@ -94,16 +96,17 @@ def getAccuracy(testSet, predictions):
             correct += 1
     return (correct / float(len(testSet))) * 100.0
 
-
 # Carrega o vocaculario
 vocab_filename = 'vocabulario.txt' # Precisamos de um vocabulario grande. Ainda nao foi testado
 vocab = load_doc(vocab_filename)
 vocab = vocab.split()
 vocab = set(vocab)
 
+
 # Carrega todas as avaliaçoes de treinamento
-positive_docs = process_docs('txt_sentoken/pos', vocab, True)
-negative_docs = process_docs('txt_sentoken/neg', vocab, True)
+#positive_docs = process_docs('txt_sentoken/pos', vocab, True)
+positive_docs = process_docs('Dataset/Banco de Dados Positivos', vocab, True)
+negative_docs = process_docs('Dataset/Banco de Dados Negativos', vocab, True)
 train_docs = negative_docs + positive_docs
 
 tokenizer = Tokenizer()
@@ -117,8 +120,8 @@ Xtrain = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 ytrain = array([0 for _ in range(900)] + [1 for _ in range(900)])
 
 # Carrega toda a revisao de testes que foram feitos
-positive_docs = process_docs('txt_sentoken/pos', vocab, False)
-negative_docs = process_docs('txt_sentoken/neg', vocab, False)
+positive_docs = process_docs('Dataset/Banco de Dados Positivos', vocab, False)
+negative_docs = process_docs('Dataset/Banco de Dados Negativos', vocab, False)
 test_docs = negative_docs + positive_docs
 
 # sequence encode
