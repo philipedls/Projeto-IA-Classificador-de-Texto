@@ -22,13 +22,14 @@ def load_doc(filename):
     return text
 
 
-#Carrega arquivo.csv na memoria
+# Carrega arquivo.csv na memoria
 def load_csv(filename):
     lines = csv.reader(open(filename, "rb"))
     dataset = list(lines)
     for i in range(len(dataset)):
         dataset[i] = [float(x) for x in dataset[i]]
     return dataset
+
 
 # Transforma o documento em tokens limpos
 def clean_doc(doc, vocab):
@@ -47,12 +48,11 @@ def process_docs(directory, vocab, is_trian):
     documents = list()
     # Percorre todos os documentos dentro de um diretorio
     for filename in listdir(directory):
-        #Pula qualquer comentario no nosso dataset
+        # Pula qualquer comentario no nosso dataset
         if is_trian and filename.startswith('cv9'):
             continue
         if not is_trian and not filename.startswith('cv9'):
             continue
-
 
         path = directory + '/' + filename
         doc = load_doc(path)
@@ -67,7 +67,7 @@ def load_embedding(filename):
     file = open(filename, 'r')
     lines = file.readlines()
     file.close()
-    #Cria um mapa de palavras para um vetor
+    # Cria um mapa de palavras para um vetor
     embedding = dict()
     for line in lines:
         parts = line.split()
@@ -75,7 +75,7 @@ def load_embedding(filename):
     return embedding
 
 
-#Peguei da internet, ainda estou estudado o que faz
+# Peguei da internet, ainda estou estudado o que faz
 def get_weight_matrix(embedding, vocab):
     # total vocabulary size plus 0 for unknown words
     vocab_size = len(vocab) + 1
@@ -88,7 +88,8 @@ def get_weight_matrix(embedding, vocab):
             weight_matrix[i] = vector
     return weight_matrix
 
-# Um segunda maneira de obter a acuracio. Ainda nao foi testado
+
+# Um segunda maneira de obter a acuracia. Ainda nao foi testado
 def getAccuracy(testSet, predictions):
     correct = 0
     for i in range(len(testSet)):
@@ -96,15 +97,15 @@ def getAccuracy(testSet, predictions):
             correct += 1
     return (correct / float(len(testSet))) * 100.0
 
+
 # Carrega o vocaculario
-vocab_filename = 'vocabulario.txt' # Precisamos de um vocabulario grande. Ainda nao foi testado
+vocab_filename = 'vocabulario.txt'  # Precisamos de um vocabulario grande. Ainda nao foi testado
 vocab = load_doc(vocab_filename)
 vocab = vocab.split()
 vocab = set(vocab)
 
-
 # Carrega todas as avaliaçoes de treinamento
-#positive_docs = process_docs('txt_sentoken/pos', vocab, True)
+# positive_docs = process_docs('txt_sentoken/pos', vocab, True)
 positive_docs = process_docs('Dataset/Banco de Dados Positivos', vocab, True)
 negative_docs = process_docs('Dataset/Banco de Dados Negativos', vocab, True)
 train_docs = negative_docs + positive_docs
@@ -132,7 +133,7 @@ ytest = array([0 for _ in range(100)] + [1 for _ in range(100)])
 
 vocab_size = len(tokenizer.word_index) + 1
 
-#Carregar Incorporaçao de um arquivo
+# Carregar Incorporaçao de um arquivo
 # raw_embedding = load_embedding('glove.6B.100d.txt')-  Realizar alguns teste
 # obter vetores na ordem certa
 embedding_vectors = get_weight_matrix(raw_embedding, tokenizer.word_index)
@@ -149,6 +150,6 @@ print(model.summary())
 # Compilaçao da Rede
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.fit(Xtrain, ytrain, epochs=10, verbose=2)
-# Avaliaçao
+# Avaliaçao feita por meio da Acuracia
 loss, acc = model.evaluate(Xtest, ytest, verbose=0)
 print('Test Accuracy: %f' % (acc * 100))
