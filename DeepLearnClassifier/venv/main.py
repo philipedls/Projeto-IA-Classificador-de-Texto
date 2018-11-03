@@ -21,16 +21,6 @@ def load_doc(filename):
     file.close()
     return text
 
-
-# Carrega arquivo.csv na memoria
-def load_csv(filename):
-    lines = csv.reader(open(filename, "rb"))
-    dataset = list(lines)
-    for i in range(len(dataset)):
-        dataset[i] = [float(x) for x in dataset[i]]
-    return dataset
-
-
 # Transforma o documento em tokens limpos
 def clean_doc(doc, vocab):
     tokens = doc.split()
@@ -99,7 +89,7 @@ def getAccuracy(testSet, predictions):
 
 
 # Carrega o vocaculario
-vocab_filename = 'vocabulario.txt'  # Precisamos de um vocabulario grande. Ainda nao foi testado
+vocab_filename = 'vocabulario.txt'  # Vocabulario feito por Edivaldo
 vocab = load_doc(vocab_filename)
 vocab = vocab.split()
 vocab = set(vocab)
@@ -150,6 +140,6 @@ print(model.summary())
 # Compilaçao da Rede
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.fit(Xtrain, ytrain, epochs=10, verbose=2)
-# Avaliaçao feita por meio da Acuracia
+# Avaliaçao feita por meio da Acuracia!
 loss, acc = model.evaluate(Xtest, ytest, verbose=0)
 print('Test Accuracy: %f' % (acc * 100))
