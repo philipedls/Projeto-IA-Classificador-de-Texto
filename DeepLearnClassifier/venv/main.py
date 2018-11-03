@@ -51,7 +51,7 @@ def process_docs(directory, vocab, is_trian):
     return documents
 
 
-# Carrega um "embutido" tipo como um diretorio
+# Carrega um "embutido" tipo como um diretorio (E uma camada de incorporaçao que mapeia indices das palavras)
 def load_embedding(filename):
     # Carrega o "embutido" na momoria e pula a primeira linha
     file = open(filename, 'r')
@@ -94,6 +94,7 @@ vocab = load_doc(vocab_filename)
 vocab = vocab.split()
 vocab = set(vocab)
 
+
 # Carrega todas as avaliaçoes de treinamento
 # positive_docs = process_docs('txt_sentoken/pos', vocab, True)
 positive_docs = process_docs('Dataset/Banco de Dados Positivos', vocab, True)
@@ -124,7 +125,7 @@ ytest = array([0 for _ in range(100)] + [1 for _ in range(100)])
 vocab_size = len(tokenizer.word_index) + 1
 
 # Carregar Incorporaçao de um arquivo
-# raw_embedding = load_embedding('glove.6B.100d.txt')-  Realizar alguns teste
+raw_embedding = load_embedding('glove.6B.100d.txt')  #-  Realizar alguns teste
 # obter vetores na ordem certa
 embedding_vectors = get_weight_matrix(raw_embedding, tokenizer.word_index)
 embedding_layer = Embedding(vocab_size, 100, weights=[embedding_vectors], input_length=max_length, trainable=False)
