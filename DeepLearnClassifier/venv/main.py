@@ -16,6 +16,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Flatten
 from keras.layers import Embedding
+from keras import optimizers
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 import re
@@ -122,13 +123,20 @@ def process_letter(directory, vocab, is_trian):
             path = directory + '/' + inside_file
             letter_tokens = load_letter_text(path)
             documents.append(letter_tokens)
-            continue
+
+
+        if not is_trian and inside_file.startswith('test'):
+            print("Lendo Arquivo para Test.....", inside_file)
+            path = directory + '/' + inside_file
+            letter_tokens = load_letter_text(path)
+            documents.append(letter_tokens)
+
 
     return documents
 
 
 # Carrega um "embutido" tipo como um diretorio (E uma camada de incorporaçao que mapeia indices das palavras)
-def load_embedding(filename):
+def embedding(filename):
     # Carrega o "embutido" na momoria e pula a primeira linha
     file = open(filename, 'r')
     lines = file.readlines()
@@ -143,11 +151,8 @@ def load_embedding(filename):
 
 # Peguei da internet, ainda estou estudado o que faz
 def get_weight_matrix(embedding, vocab):
-    # total vocabulary size plus 0 for unknown words
     vocab_size = len(vocab) + 1
-    # define weight matrix dimensions with all 0
     weight_matrix = zeros((vocab_size, 100))
-    # step vocab, store vectors using the Tokenizer's integer mapping
     for word, i in vocab.items():
         vector = embedding.get(word)
         if vector is not None:
@@ -180,52 +185,41 @@ encoded_letters = tokenizer.texts_to_sequences(train)
 length = max([len(s) for s in train])
 X_train = pad_sequences(encoded_letters, maxlen=length, padding='post')
 # Definiçao de rotulos de treinamento
-ytrain = array([0 for _ in range(900)] + [1 for _ in range(900)])
+Y_train = array([0 for _ in range(36)] + [1 for _ in range(36)])
 
 # Carrega a base dos testes
 letter_positive = process_letter('Dataset/Banco de Dados Positivos', vocab, False)
 letter_negative = process_letter('Dataset/Banco de Dados Negativos', vocab, False)
 test_learning = letter_positive + letter_negative
 
+encoded_letters = tokenizer.texts_to_sequences(test_learning)
+
+X_test = pad_sequences(encoded_letters, maxlen=length, padding='post')
+Y_test = array([0 for _ in range(100)] + [1 for _ in range(100)])
+
 # Definir o tamanho do vocabulario
 size = len(tokenizer.word_index) + 1
 
+gross_embedding = embedding('Dataset/glove.txt')
+embeddin_arrays = get_weight_matrix(gross_embedding, tokenizer.word_index)
+embedding_layer = Embedding(size, 100, weights=[embeddin_arrays], input_length=length, trainable=False)
+
+# Obter um otmizador / Exemplo baseado em https://keras.io/optmizers
+optimizer = optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=-.999, epsilon=None, decay=0.0, amsgrad=False)
+
 # Definiçao do Modelo da CNN
-model = Sequential()
-model.add(Embedding(size, 150, input_length=length, ))
-model.add(Conv1D(filters=30, kernel_size=8, activation='relu'))
-model.add(MaxPooling1D(pool_size=2))
-model.add(Flatten())
-model.add(Dense(10, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
-print(model.summary())
-
-'''# sequence encode
-encoded_docs = tokenizer.texts_to_sequences(test_docs)
-Xtest = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
-# Definiçao de rotulos de treinamento
-ytest = array([0 for _ in range(100)] + [1 for _ in range(100)])
-
-vocab_size = len(tokenizer.word_index) + 1
-
-# Carregar Incorporaçao de um arquivo
-raw_embedding = load_embedding('glove.6B.100d.txt')  # -  Realizar alguns teste
-# obter vetores na ordem certa
-embedding_vectors = get_weight_matrix(raw_embedding, tokenizer.word_index)
-embedding_layer = Embedding(vocab_size, 100, weights=[embedding_vectors], input_length=max_length, trainable=False)
-
-# Definiçao de um modelo
 model = Sequential()
 model.add(embedding_layer)
 model.add(Conv1D(filters=128, kernel_size=5, activation='relu'))
 model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
+model.add(Dense(10, activation='relu'))
+# Camada de saida, a qual a ativaçao sigmoid gera um valor entre 0 e 1
 model.add(Dense(1, activation='sigmoid'))
-print(model.summary())
-# Compilaçao da Rede
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(Xtrain, ytrain, epochs=10, verbose=2)
-# Avaliaçao feita por meio da Acuracia!
-loss, acc = model.evaluate(Xtest, ytest, verbose=0)
-print('Testar Acuracia: %f' % acc)
-'''
+model.fit(X_train, Y_train, epochs=5, verbose=2)
+print(model.summary())
+
+loss, accuracy = model.evaluate()
+print('Taxa de Perda: ', loss)
+print('Taxa de Acuracia: ', accuracy * 100)
