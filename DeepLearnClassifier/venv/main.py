@@ -22,7 +22,9 @@ import re
 
 vocabulary_path = 'Dataset/VocabularioPronto1.txt'
 
+
 stop_words = set(stopwords.words('portuguese') + list(punctuation) + list(digits))
+
 
 def load_letter_text(filename):
     filtered_words_letter = []
@@ -48,7 +50,7 @@ def load_letter_text(filename):
 
         filtered_words_letter = tokenize.word_tokenize(trick)
 
-        return filtered_words_letter
+    return filtered_words_letter
 
 
 def load_vocabulary_doc(filename):
@@ -85,7 +87,6 @@ def upgrade_vocabulary(filtered_words_letter, path_vocabulary_file):
             cont_equal_vocab = 0
 
 
-
 # Atualiza o vocabulario a medida que aumenta a leitura no dataset
 def upgrade_vocabulary(vocabulary_existent, tokens):
     with open(vocabulary_existent, 'r', encoding='latin-1') as file:
@@ -116,15 +117,13 @@ def process_letter(directory, vocab, is_trian):
     # Percorre todos os documentos dentro de um diretorio
     for inside_file in listdir(directory):
         # Pula qualquer comentario no nosso dataset
-        if is_trian and inside_file.startswith('00'):
+        if is_trian and inside_file.startswith('0'):
             print("Lendo Arquivo.....", inside_file)
-            continue
-        if not is_trian and not inside_file.startswith('00'):
+            path = directory + '/' + inside_file
+            letter_tokens = load_letter_text(path)
+            documents.append(letter_tokens)
             continue
 
-        path = directory + '/' + inside_file
-        letter_tokens = load_letter_text(path)
-        documents.append(letter_tokens)
     return documents
 
 
@@ -171,14 +170,14 @@ vocab = set(vocab)
 # Carrega todas as avaliaçoes de treinamento
 letter_positive = process_letter('Dataset/Banco de Dados Positivos', vocab, True)
 letter_negative = process_letter('Dataset/Banco de Dados Negativos', vocab, True)
-practice = letter_positive + letter_negative
+train = letter_positive + letter_negative
 
 tokenizer = Tokenizer()
-tokenizer.fit_on_texts(practice)
+tokenizer.fit_on_texts(train)
 
-encoded_letters = tokenizer.texts_to_sequences(practice)
-#Conjunto de Treinameto e seu comprimento!
-length = max([len(s) for s in practice])
+encoded_letters = tokenizer.texts_to_sequences(train)
+# Conjunto de Treinameto e seu comprimento!
+length = max([len(s) for s in train])
 X_train = pad_sequences(encoded_letters, maxlen=length, padding='post')
 # Definiçao de rotulos de treinamento
 ytrain = array([0 for _ in range(900)] + [1 for _ in range(900)])
@@ -186,14 +185,14 @@ ytrain = array([0 for _ in range(900)] + [1 for _ in range(900)])
 # Carrega a base dos testes
 letter_positive = process_letter('Dataset/Banco de Dados Positivos', vocab, False)
 letter_negative = process_letter('Dataset/Banco de Dados Negativos', vocab, False)
-test_learning = letter_negative + letter_positive
+test_learning = letter_positive + letter_negative
 
 # Definir o tamanho do vocabulario
 size = len(tokenizer.word_index) + 1
 
 # Definiçao do Modelo da CNN
 model = Sequential()
-model.add(Embedding(size, 150, input_length=length,))
+model.add(Embedding(size, 150, input_length=length, ))
 model.add(Conv1D(filters=30, kernel_size=8, activation='relu'))
 model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
